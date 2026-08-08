@@ -1,0 +1,8 @@
+# TESVRIX BASIC SECURITY
+Options -Indexes
+
+# Block access to hidden files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
