@@ -1,6 +1,3 @@
-# Tesvrix
-Tesvrix is an web based remote control for Android device 
-
 # Tesvrix  — Complete Setup Guide (Local Hosting)
 
 This guide explains how to host the whole TesvrixV2 system **on your own PC** and expose it to the internet with Cloudflare quick tunnels — no paid hosting needed.
