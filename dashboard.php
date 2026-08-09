@@ -616,7 +616,7 @@ function sanitize_nexus($data) {
 <div class="particle-field" id="particleBg"></div>
 
 <div class="welcome-overlay" id="welcomeOverlay" style="display: none;">
-    <img src="https://res.cloudinary.com/dde8dwjoy/image/upload/v1779174063/logo1_itflyy.png" alt="TESVRIX" class="welcome-logo">
+    <img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/logo2_dty1yw.png" alt="TESVRIX" class="welcome-logo">
     <div class="welcome-text" id="welcomeUserText">SECURE PROTOCOL</div>
     <div class="welcome-subtext">TESVRIX DATA ENCRYPTION SYNCED</div>
 </div>
@@ -624,7 +624,7 @@ function sanitize_nexus($data) {
 <div class="app-container">
     <aside class="sidebar">
         <div class="logo-section">
-            <img src="https://res.cloudinary.com/dde8dwjoy/image/upload/v1779174063/logo2_dty1yw.png" alt="Tesvrix" class="logo-img" onerror="this.src='https://via.placeholder.com/75?text=TX'">
+            <img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/logo2_dty1yw.png" alt="Tesvrix" class="logo-img" onerror="this.src='https://via.placeholder.com/75?text=TX'">
             <div class="logo-text">TESVRIX</div>
             <div class="user-badge" id="sidebarUserBadge">? SECURE LINK</div>
         </div>
