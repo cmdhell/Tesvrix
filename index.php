@@ -227,7 +227,7 @@ function sanitize_xss($data) {
     <div class="bg-matrix" id="particleBg"></div>
     <div class="login-container">
         <div class="logo-wrapper">
-            <img src="https://res.cloudinary.com/dde8dwjoy/image/upload/v1779174063/logo2_dty1yw.png" 
+            <img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/logo2_dty1yw.png" 
                  alt="TESVRIX · UNITED IN SHADOW" 
                  class="brand-logo">
         </div>
