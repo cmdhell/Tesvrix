@@ -1,3 +1,8 @@
+
+https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/logo2_dty1yw.png
+
+https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/IMG_20260806_130805_435.jpg
+
 # Tesvrix  — Complete Setup Guide (Local Hosting)
 
 This guide explains how to host the whole TesvrixV2 system **on your own PC** and expose it to the internet with Cloudflare quick tunnels — no paid hosting needed.
