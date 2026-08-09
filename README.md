@@ -9,7 +9,7 @@ This guide explains how to host the whole TesvrixV2 system **on your own PC** an
 
 It covers everything from scratch: installing tools, creating the database, running the server, running the web panel, connecting it all through tunnels, configuring the Android APK, and building it.
 
-
+```
 Tesvrix/
 │
 ├── index.php
@@ -35,6 +35,8 @@ Tesvrix/
     ├── screen.php
     └── surveillance.php
     ```
+
+```
 
 > All values in `<ANGLE BRACKETS>` are placeholders. Replace them with **your own** values. Never share your real tokens/keys with anyone.
 
