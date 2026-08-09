@@ -9,8 +9,32 @@ This guide explains how to host the whole TesvrixV2 system **on your own PC** an
 
 It covers everything from scratch: installing tools, creating the database, running the server, running the web panel, connecting it all through tunnels, configuring the Android APK, and building it.
 
-sections/call,sms,other.php
-index.php & dashboard.php in on directory 
+```
+Tesvrix/
+│
+├── index.php
+├── dashboard.php
+├── project.js
+│
+├── config/                 
+│   └── config.php
+│
+└── section/
+    ├── CALL COMMAND.php
+    ├── DEVICE STATS.php
+    ├── SECURITY.php
+    ├── SMS CENTER.php
+    ├── about.php
+    ├── cam.php
+    ├── coming.php
+    ├── file.php
+    ├── intercom.php
+    ├── keys.php
+    ├── location.php
+    ├── notifications.php
+    ├── screen.php
+    └── surveillance.php
+    ```
 
 > All values in `<ANGLE BRACKETS>` are placeholders. Replace them with **your own** values. Never share your real tokens/keys with anyone.
 
