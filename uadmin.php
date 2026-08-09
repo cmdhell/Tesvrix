@@ -243,7 +243,7 @@ if (!empty($searchQuery)) {
     <!-- Login form (unchanged) -->
     <div class="cyber-panel rounded-3xl p-8 w-full max-w-md border-b-2 border-b-red-700/80 shadow-[0_0_60px_rgba(220,15,15,0.08)]">
         <div class="text-center mb-8">
-            <img src="https://res.cloudinary.com/dde8dwjoy/image/upload/v1779174063/logo2_dty1yw.png" 
+            <img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/logo2_dty1yw.png" 
                  alt="TESVRIX HQ" class="brand-logo max-w-[160px] mx-auto mb-4">
             <h1 class="text-xl font-black tracking-[0.25em] text-red-600 uppercase">HQ OVERWATCH</h1>
             <p class="text-[9px] tracking-[0.3em] text-zinc-500 mt-1.5 font-mono">ROOT LEVEL AUTH ONLY</p>
