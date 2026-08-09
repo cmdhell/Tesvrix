@@ -9,7 +9,7 @@ This guide explains how to host the whole TesvrixV2 system **on your own PC** an
 
 It covers everything from scratch: installing tools, creating the database, running the server, running the web panel, connecting it all through tunnels, configuring the Android APK, and building it.
 
-```
+
 Tesvrix/
 │
 ├── index.php
