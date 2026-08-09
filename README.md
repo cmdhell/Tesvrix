@@ -102,7 +102,7 @@ All of these run on **Windows**. You need:
 | Gradle 9.5.1 | APK build tool | 9.5.1 |
 | cloudflared | Free public tunnels | any recent release |
 | Supabase account | Free cloud database | free tier |
-| An Android phone | Target device | Android 8+ |
+| An Android phone | Target device | Android 15+ |
 | Optional: Android Studio | Easier APK building | any recent version |
 
 ### Installing quickly
